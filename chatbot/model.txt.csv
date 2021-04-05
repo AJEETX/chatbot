@@ -1,0 +1,18 @@
+Sentiment_Text,Sentiment
+I am good,Positive
+ I am fine,Positive
+ I m sad,Negative
+Not good,Negative
+I am well,Positive
+I am too good,Positive
+I am too well,Positive
+Good,Positive
+Fine,Positive
+Well,Positive
+Very good,Positive
+great,Positive
+I am not fine,Negative
+I am not good,Negative
+I am nice,Positive
+Doing great,Positive
+No good,Negative
