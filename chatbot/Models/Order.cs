@@ -11,6 +11,6 @@ namespace chatbot.Models
 
         public String DeliveryMethod { get; set; }
 
-        public List<Pizza> OrderedPizzas { get; set; } = new List<Pizza>();
+        public List<Product> OrderedProducts { get; set; } = new List<Product>();
     }
 }

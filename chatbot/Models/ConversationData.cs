@@ -10,17 +10,17 @@ namespace chatbot.Models
         //State Management properties
         public bool HasWelcomed { get; set; } = false;
 
-        public bool HasSelectedPizza { get; set; } = false;
+        public bool HasSelectedProduct { get; set; } = false;
 
-        public bool HasSelectedPizzaSize { get; set; } = false;
+        public bool HasSelectedProductSize { get; set; } = false;
 
         //Data
-        public PizzaSize SelectedPizzaSize { get; set; } = PizzaSize.SMALL;
+        public ProductSize SelectedProductSize { get; set; } = ProductSize.SMALL;
 
-        public PizzaType SelectedPizzaType { get; set; } = PizzaType.NONE;
+        public Category Category { get; set; } = Category.NONE;
     }
 
-    public enum PizzaSize
+    public enum ProductSize
     {
         SMALL = 1,
 
@@ -31,16 +31,16 @@ namespace chatbot.Models
         EXTRA_LARGE = 4
     }
 
-    public enum PizzaType
+    public enum Category
     {
         NONE = 0,
 
-        PEPPERONI = 1,
+        TIMBER = 1,
 
-        CHEESE = 2,
+        COLOR = 2,
 
-        MEAT_LOVERS = 3,
+        RENOVATION = 3,
 
-        VEGGIE_DELIGHT = 4
+        BATHROOM = 4
     }
 }

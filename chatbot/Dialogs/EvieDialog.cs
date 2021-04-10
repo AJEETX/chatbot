@@ -10,16 +10,16 @@ using Microsoft.Bot.Builder.Dialogs.Choices;
 
 namespace chatbot.Dialogs
 {
-    public class PizzaDialog : ComponentDialog
+    public class EvieDialog : ComponentDialog
     {
         private readonly IStatePropertyAccessor<UserData> _userDataAccessor;
         private readonly IStatePropertyAccessor<ConversationData> _conversationDataAccessor;
 
         private static string TOP_LEVEL_WATERFALL_NAME = "INITIAL";
-        private static String NUM_PIZZA_DIALOG_PROMPT_NAME = "NUM_PIZZA_PROMPT";
+        private static String NUM_PRODUCT_DIALOG_PROMPT_NAME = "NUM_PRODUCT_PROMPT";
 
-        public PizzaDialog(UserState userState, ConversationState conversationState)
-            : base(nameof(PizzaDialog))
+        public EvieDialog(UserState userState, ConversationState conversationState)
+            : base(nameof(EvieDialog))
         {
             _userDataAccessor = userState.CreateProperty<UserData>("UserData");
             _conversationDataAccessor = conversationState.CreateProperty<ConversationData>("ConversationData");
@@ -32,10 +32,10 @@ namespace chatbot.Dialogs
             // This array defines how the Waterfall will execute.
             var waterfallSteps = new WaterfallStep[]
             {
-                TakeoutOrDeliveryStepAsync,
-                PizzaTypeStepAsync,
-                PizzaSizeStepAsync,
-                NumberOfPizzasStepAsync,
+                PurchaseOrEnquiryStepAsync,
+                ProductTypeStepAsync,
+                ProductSizeStepAsync,
+                NumberOfProductStepAsync,
                 ConfirmOrderStepAsync,
                 PlaceOrderStepAsync
             };
@@ -44,7 +44,7 @@ namespace chatbot.Dialogs
             AddDialog(new WaterfallDialog(TOP_LEVEL_WATERFALL_NAME, waterfallSteps));
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), waterfallSteps));
             AddDialog(new TextPrompt(nameof(TextPrompt)));
-            AddDialog(new NumberPrompt<int>(NUM_PIZZA_DIALOG_PROMPT_NAME, NumPizzaValidator));
+            AddDialog(new NumberPrompt<int>(NUM_PRODUCT_DIALOG_PROMPT_NAME, NumPizzaValidator));
             AddDialog(new ChoicePrompt(nameof(ChoicePrompt)));
             AddDialog(new ConfirmPrompt(nameof(ConfirmPrompt)));
 
@@ -57,67 +57,69 @@ namespace chatbot.Dialogs
             return await stepContext.PromptAsync(nameof(WaterfallDialog), null, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> TakeoutOrDeliveryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> PurchaseOrEnquiryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // WaterfallStep always finishes with the end of the Waterfall or with another dialog; here it is a Prompt Dialog.
             // Running a prompt here means the next WaterfallStep will be run when the users response is received.
             return await stepContext.PromptAsync(nameof(ChoicePrompt),
                 new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("Takeout or Delivery?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Delivery", "Takeout" }),
+                    Prompt = MessageFactory.Text("Do you need to Purchase or want to make and Enquiry?"),
+                    Choices = ChoiceFactory.ToChoices(new List<string> { "Purchase", "Enquiry" }),
                 }, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> PizzaTypeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> ProductTypeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["takeoutOrDelivery"] = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values["purchaseOrEnquiry"] = ((FoundChoice)stepContext.Result).Value;
 
             // WaterfallStep always finishes with the end of the Waterfall or with another dialog; here it is a Prompt Dialog.
             // Running a prompt here means the next WaterfallStep will be run when the users response is received.
             return await stepContext.PromptAsync(nameof(ChoicePrompt),
                 new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("What type of pizza would do you want?"),
-                    Choices = ChoiceFactory.ToChoices(new List<string> { "Cheese", "Pepperoni", "Meat Lovers", "Veggie Delight" }),
+                    Prompt = MessageFactory.Text("What type of product would do you want to purchase ?"),
+                    Choices = ChoiceFactory.ToChoices(new List<string> {
+                        "TIMBER", "RENOVATION", "COLOuR", "BATHROOM"}),
                 }, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> PizzaSizeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private static async Task<DialogTurnResult> ProductSizeStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["pizzaType"] = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values["productType"] = ((FoundChoice)stepContext.Result).Value;
 
             return await stepContext.PromptAsync(nameof(ChoicePrompt),
                 new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("What size?"),
+                    Prompt = MessageFactory.Text($"What size of the {stepContext.Values["productType"]} you wish to buy ?"),
                     Choices = ChoiceFactory.ToChoices(new List<string> { "Small", "Medium", "Large", "Extra Large" }),
                 }, cancellationToken);
         }
 
-        private async Task<DialogTurnResult> NumberOfPizzasStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> NumberOfProductStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["pizzaSize"] = ((FoundChoice)stepContext.Result).Value;
+            stepContext.Values["productSize"] = ((FoundChoice)stepContext.Result).Value;
 
             var promptOptions = new PromptOptions
             {
-                Prompt = MessageFactory.Text($"How many {stepContext.Values["pizzaSize"]} {stepContext.Values["pizzaType"]} pizzas would you like?"),
-                RetryPrompt = MessageFactory.Text("The value entered must be greater than 0 and less than 10."),
+                Prompt = MessageFactory.Text($"How many {stepContext.Values["productSize"]} {stepContext.Values["productType"]} would you like to purchase ?"),
+                Choices = ChoiceFactory.ToChoices(new List<string> { "1", "2", "3", "5", "10", "More" }),
+                RetryPrompt = MessageFactory.Text("The value entered must be greater than 0 and less than 100."),
             };
 
-            return await stepContext.PromptAsync(NUM_PIZZA_DIALOG_PROMPT_NAME, promptOptions, cancellationToken);
+            return await stepContext.PromptAsync(NUM_PRODUCT_DIALOG_PROMPT_NAME, promptOptions, cancellationToken);
         }
 
         private async Task<DialogTurnResult> ConfirmOrderStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            stepContext.Values["numPizza"] = (int)stepContext.Result;
+            stepContext.Values["productQuantity"] = (int)stepContext.Result;
 
-            var numberOfPizzas = stepContext.Values["numPizza"];
-            var pizzaSize = stepContext.Values["pizzaSize"];
-            var pizzaType = stepContext.Values["pizzaType"];
+            var productQuantity = stepContext.Values["productQuantity"];
+            var productSize = stepContext.Values["productSize"];
+            var productType = stepContext.Values["productType"];
 
             // We can send messages to the user at any point in the WaterfallStep.
-            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Order Preview\n{numberOfPizzas} - {pizzaSize} {pizzaType}"), cancellationToken);
+            await stepContext.Context.SendActivityAsync(MessageFactory.Text($"Order Preview\n{productQuantity} - {productSize} {productType}"), cancellationToken);
 
             // WaterfallStep always finishes with the end of the Waterfall or with another dialog; here it is a Prompt Dialog.
             return await stepContext.PromptAsync(nameof(ConfirmPrompt), new PromptOptions { Prompt = MessageFactory.Text("Does your order look correct?") }, cancellationToken);
@@ -133,12 +135,12 @@ namespace chatbot.Dialogs
 
             //If user types Yes, we want to place the order
 
-            var newOrder = new Order() { DeliveryMethod = (String)stepContext.Values["takeoutOrDelivery"] };
-            newOrder.OrderedPizzas.Add(new Pizza()
+            var newOrder = new Order() { DeliveryMethod = (String)stepContext.Values["purchaseOrEnquiry"] };
+            newOrder.OrderedProducts.Add(new Product()
             {
-                NumberOfPizzas = (int)stepContext.Values["numPizza"],
-                PizzaType = (String)stepContext.Values["pizzaType"],
-                PizzaSize = (String)stepContext.Values["pizzaSize"]
+                NumberOfItem = (int)stepContext.Values["productQuantity"],
+                ItemType = (String)stepContext.Values["productType"],
+                ItemSize = (String)stepContext.Values["productSize"]
             });
 
             // Make a call to the Order API

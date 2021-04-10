@@ -35,10 +35,10 @@ namespace chatbot
             services.AddSingleton<IStorage, MemoryStorage>();
             services.AddSingleton<UserState>();
             services.AddSingleton<ConversationState>();
-            services.AddSingleton<PizzaDialog>();
+            services.AddSingleton<EvieDialog>();
             // Create the bot as a transient. In this case the ASP Controller is expecting an IBot.
             //services.AddTransient<IBot, EchoBot>();
-            services.AddTransient<IBot, PizzaBot<PizzaDialog>>();
+            services.AddTransient<IBot, EvieBot<EvieDialog>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

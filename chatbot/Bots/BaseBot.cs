@@ -10,14 +10,14 @@ using Microsoft.Extensions.Logging;
 
 namespace chatbot.Bots
 {
-    public class BasePizzaBot<T> : ActivityHandler where T : Dialog
+    public class BaseBot<T> : ActivityHandler where T : Dialog
     {
         protected readonly Dialog Dialog;
         protected readonly BotState ConversationState;
         protected readonly BotState UserState;
         protected readonly ILogger Logger;
 
-        public BasePizzaBot(ConversationState conversationState, UserState userState, T dialog, ILogger<BasePizzaBot<T>> logger)
+        public BaseBot(ConversationState conversationState, UserState userState, T dialog, ILogger<BaseBot<T>> logger)
         {
             ConversationState = conversationState;
             UserState = userState;
